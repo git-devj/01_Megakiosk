@@ -1,0 +1,1346 @@
+import sys
+from PyQt5.QtWidgets import *
+from PyQt5 import uic
+from time import sleep
+
+form_class = uic.loadUiType("project.ui")[0]
+
+
+# 추천메뉴 list+price
+rec_menu_list = ['메가 초코', '수박 주스', '샤인머스캣그린주스', '코코넛 커피 스무디']
+rec_menu_price = [3800, 4500, 4500, 5300]
+# 커피(HOT) list+price
+hot_menu_list = ['아메리카노(Hot)', '헤이즐넛 아메리카노(Hot)', '바닐라 아메리카노(Hot)', '꿀 아메리카노']
+hot_menu_price = [1500, 2700, 2700, 2700]
+# 커피(ICE) list+price
+ice_menu_list = ['아메리카노(Ice)', '메가리카노 1리터', '헤이즐넛 아메리카노(Ice)', '바닐라 아메리카노(Ice)']
+ice_menu_price = [2000, 3000, 2700, 2700]
+# 스무디, 프라페 list+price
+smf_menu_list = ['플레인 요거트스무디', '망고 요거트스무디', '딸기 요거트스무디', '스트로베리 치즈홀릭']
+smf_menu_price = [3900, 3900, 3900, 4500]
+# 에이드, 주스 list+price
+adj_menu_list = ['체리콕 에이드', '자몽 에이드', '레몬 에이드', '블루레몬 에이드']
+adj_menu_price = [3300, 3500, 3500, 3500]
+# 티(TEA) list+price
+tea_menu_list = ['녹차', '얼그레이', '캐모마일', '페퍼민트']
+tea_menu_price = [2500, 2500, 2500, 2500]
+# 음료 list+price
+dik_menu_list = ['곡물라떼', '아이스초코', '핫초코', '민트크림초코']
+dik_menu_price = [3000, 3500, 3500, 3500]
+# 디저트 list+price
+des_menu_list = ['쿠키 프라페 마카롱', '유니콘 프라페 마카롱', '퐁크러쉬 마카롱', '바닐라 마카롱']
+des_menu_price = [1800, 1800, 1800, 1800]
+# All_menu
+chu_menu = ['손흥민 그립톡(블랙)', '손흥민 그립톡(화이트)', '손흥민 H유니폼(L Size)', '손흥민 A유니폼(L Size)']
+chu_price = [13000, 13000, 150000, 150000]
+all_menu = ['메가 초코', '수박 주스', '샤인머스캣그린주스', '코코넛 커피 스무디', '아메리카노(Hot)',
+            '헤이즐넛 아메리카노(Hot)', '바닐라 아메리카노(Hot)', '꿀 아메리카노', '아메리카노(Ice)',
+            '메가리카노 1리터', '헤이즐넛 아메리카노(Ice)', '바닐라 아메리카노(Ice)', '플레인 요거트스무디',
+            '망고 요거트스무디', '딸기 요거트스무디', '스트로베리 치즈홀릭', '체리콕 에이드',
+            '자몽 에이드', '레몬 에이드', '블루레몬 에이드', '녹차', '얼그레이', '캐모마일', '페퍼민트',
+            '곡물라떼', '아이스초코', '핫초코', '민트크림초코', '쿠키 프라페 마카롱', '유니콘 프라페 마카롱',
+            '퐁크러쉬 마카롱', '바닐라 마카롱' ]
+
+class WindowClass(QMainWindow, form_class) :
+
+    # 수연씨 # 옵션상품 선택 화면
+    option_c = ["시나몬(O)", "시나몬(X)"]   #시나몬 변수
+    option_w = ["휘핑(O)", "휘핑(X)"]   #휘핑 변수
+    option_s = ["선택안함", "연하게", "샷 추가(500원)", "2샷 추가(1000원)"]   #샷 변수
+    basket_c = []   #시나몬 출력할 값
+    basket_w = []   #휘핑 출력할 값
+    basket_s = []   #샷 출력할 값
+    option_stevia = ["선택안함", "스테비아 추가"]
+    basket_stevia = []  # 샷 출력할 값
+
+    option_macaron = "선택안함"
+    # 돈 바구니
+    money_calculation = 0
+    # 총 금액
+    money_count = 0
+    # 상품 추가 총 금액
+    money_final_count = 0
+    # 수량 확인
+    ea_count = 0
+    #옵션추가된 메뉴 금액 저장
+    money_arithmetics = []*5
+    #증감 메뉴 저장
+    money_plus_exe = [0]*5
+    #총 금액
+    money_result = 0
+
+    #장바구니 1,2,3,4,5 번호별 수량 체크
+
+    basket1_ea_count = 0
+    basket2_ea_count = 0
+    basket3_ea_count = 0
+    basket4_ea_count = 0
+    basket5_ea_count = 0
+
+    basket1_money_count = 0
+    basket2_money_count = 0
+    basket3_money_count = 0
+    basket4_money_count = 0
+    basket5_money_count = 0
+
+    maca_money = [0]*5
+
+
+
+    def __init__(self) :
+        super().__init__()
+        self.setupUi(self)
+        # 실행시 첫 화면 지정
+        self.stackedWidget1.setCurrentIndex(0)
+        # 첫 화면에서 메뉴화면 넘어가기 버튼
+
+        self.btn_main.clicked.connect(self.btn_main_exe)
+        # 카테고리- 추천메뉴
+        self.btn_cgr1.clicked.connect(self.btn_cgr1_exe)
+        # 카테고리- 커피 핫
+        self.btn_cgr2.clicked.connect(self.btn_cgr2_exe)
+        # 카테고리- 커피 아이스
+        self.btn_cgr3.clicked.connect(self.btn_cgr3_exe)
+        # 카테고리- 스무디,프라페
+        self.btn_cgr4.clicked.connect(self.btn_cgr4_exe)
+        # 카테고리 - 에이드
+        self.btn_cgr5.clicked.connect(self.btn_cgr5_exe)
+        # 카테고리 - 티
+        self.btn_cgr6.clicked.connect(self.btn_cgr6_exe)
+        # 카테고리 - 음료
+        self.btn_cgr7.clicked.connect(self.btn_cgr7_exe)
+        # 카테고리 - 디저트
+        self.btn_cgr8.clicked.connect(self.btn_cgr8_exe)
+
+        # 카테고리- 홈 버튼
+        self.btn_home.clicked.connect(self.btn_home_exe)
+
+        # 메뉴 버튼 #
+        # 추천메뉴 - 메가 초코 버튼
+        self.btn_menu.clicked.connect(lambda menu: self.btn_menu_exe(0, rec_menu_list, rec_menu_price))
+        # 추천메뉴 - 수박 주스 버튼
+        self.btn_menu2.clicked.connect(lambda menu: self.btn_menu_exe(1, rec_menu_list, rec_menu_price))
+        # 추천메뉴 - 샤인머스캣그린주스 버튼
+        self.btn_menu3.clicked.connect(lambda menu: self.btn_menu_exe(2, rec_menu_list, rec_menu_price))
+        # 추천메뉴 - 코코넛 커피 스무디 버튼
+        self.btn_menu4.clicked.connect(lambda menu: self.btn_menu_exe(3, rec_menu_list, rec_menu_price))
+
+        # 커피 핫 - 아메리카노 버튼
+        self.btn1_menu.clicked.connect(lambda menu: self.btn_menu_exe(0, hot_menu_list, hot_menu_price))
+        # 커피 핫 - 헤이즐넛 아메리카노 버튼
+        self.btn1_menu2.clicked.connect(lambda menu: self.btn_menu_exe(1, hot_menu_list, hot_menu_price))
+        # 커피 핫 - 바닐라 아메리카노 버튼
+        self.btn1_menu3.clicked.connect(lambda menu: self.btn_menu_exe(2, hot_menu_list, hot_menu_price))
+        # 커피 핫 - 꿀 아메리카노 버튼
+        self.btn1_menu4.clicked.connect(lambda menu: self.btn_menu_exe(3, hot_menu_list, hot_menu_price))
+
+        # 커피 아이스 - 아메리카노 버튼
+        self.btn2_menu.clicked.connect(lambda menu: self.btn_menu_exe(0, ice_menu_list, ice_menu_price))
+        # 커피 아이스 - 메카리카노 1리터 버튼
+        self.btn2_menu2.clicked.connect(lambda menu: self.btn_menu_exe(1, ice_menu_list, ice_menu_price))
+        # 커피 아이스 - 헤이즐넛 아메리카노 버튼
+        self.btn2_menu3.clicked.connect(lambda menu: self.btn_menu_exe(2, ice_menu_list, ice_menu_price))
+        # 커피 아이스 - 바닐라 아메리카노 버튼
+        self.btn2_menu4.clicked.connect(lambda menu: self.btn_menu_exe(3, ice_menu_list, ice_menu_price))
+
+        # 스무디, 프라페 - 플레인 요거트 스무디 버튼
+        self.btn3_menu.clicked.connect(lambda menu: self.btn_menu_exe(0, smf_menu_list, smf_menu_price))
+        # 스무디, 프라페 - 망고 요거트 스무디 버튼
+        self.btn3_menu2.clicked.connect(lambda menu: self.btn_menu_exe(1, smf_menu_list, smf_menu_price))
+        # 스무디, 프라페 - 딸기 요거트 스무디 버튼
+        self.btn3_menu3.clicked.connect(lambda menu: self.btn_menu_exe(2, smf_menu_list, smf_menu_price))
+        # 스무디, 프라페 - 스트로베리 치즈홀릭 버튼
+        self.btn3_menu4.clicked.connect(lambda menu: self.btn_menu_exe(3, smf_menu_list, smf_menu_price))
+
+        self.btn4_menu.clicked.connect(lambda menu: self.btn_menu_exe2(0, adj_menu_list, adj_menu_price))  # 체리콕
+        self.btn4_menu2.clicked.connect(lambda menu: self.btn_menu_exe2(1, adj_menu_list, adj_menu_price))  # 자몽
+        self.btn4_menu3.clicked.connect(lambda menu: self.btn_menu_exe2(2, adj_menu_list, adj_menu_price))  # 레몬
+        self.btn4_menu4.clicked.connect(lambda menu: self.btn_menu_exe2(3, adj_menu_list, adj_menu_price))  # 블루레몬
+
+        self.btn5_menu.clicked.connect(lambda menu: self.btn_menu_exe2(0, tea_menu_list, tea_menu_price))  # 녹차
+        self.btn5_menu2.clicked.connect(lambda menu: self.btn_menu_exe2(1, tea_menu_list, tea_menu_price))  # 얼그레이
+        self.btn5_menu3.clicked.connect(lambda menu: self.btn_menu_exe2(2, tea_menu_list, tea_menu_price))  # 캐모마일
+        self.btn5_menu4.clicked.connect(lambda menu: self.btn_menu_exe2(3, tea_menu_list, tea_menu_price))  # 페퍼민트
+
+        self.btn6_menu.clicked.connect(lambda menu: self.btn_menu_exe2(0, dik_menu_list, dik_menu_price))  # 곡물라떼
+        self.btn6_menu2.clicked.connect(lambda menu: self.btn_menu_exe2(1, dik_menu_list, dik_menu_price))  # 아이스초코
+        self.btn6_menu3.clicked.connect(lambda menu: self.btn_menu_exe2(2, dik_menu_list, dik_menu_price))  # 핫초코
+        self.btn6_menu4.clicked.connect(lambda menu: self.btn_menu_exe2(3, dik_menu_list, dik_menu_price))  # 민트크림초코
+
+
+        # 마카롱
+        self.btn7_menu.clicked.connect(lambda menu: self.btn_menu_exe3(0, des_menu_list, des_menu_price))  # 쿠키 프라페 마카롱
+        self.btn7_menu2.clicked.connect(lambda menu: self.btn_menu_exe3(1, des_menu_list, des_menu_price))  # 유니콘 프라페 마카롱
+        self.btn7_menu3.clicked.connect(lambda menu: self.btn_menu_exe3(2, des_menu_list, des_menu_price))  # 퐁크러쉬 마카롱
+        self.btn7_menu4.clicked.connect(lambda menu: self.btn_menu_exe3(3, des_menu_list, des_menu_price))  # 바닐라 마카롱
+
+        # 추천메뉴
+        self.btn8_menu.clicked.connect(lambda: self.btn_menu2_exe(0, chu_menu, chu_price))  # 수박주스
+        self.btn8_menu2.clicked.connect(lambda: self.btn_menu2_exe(1, chu_menu, chu_price))  # 망고 요거트 스무디
+        self.btn8_menu3.clicked.connect(lambda: self.btn_menu2_exe(2, chu_menu, chu_price))  # 캐모마일
+        self.btn8_menu4.clicked.connect(lambda: self.btn_menu2_exe(3, chu_menu, chu_price))  # 퐁크러쉬 마카롱
+        # 주문 담기 버튼
+        self.pushButton_3.clicked.connect(self.pushButton_3_exe)
+
+        self.pushButton_12.clicked.connect(self.pushButton_3_exe2)
+        self.pushButton_14.clicked.connect(self.pushButton_3_exe3)
+        self.btn_x.clicked.connect(self.btn_x_exe) # 1번 메뉴 삭제 버튼
+        self.btn_x2.clicked.connect(self.btn_x2_exe) # 2번 메뉴 삭제 버튼
+        self.btn_x3.clicked.connect(self.btn_x3_exe) # 3번 메뉴 삭제 버튼
+        self.btn_x4.clicked.connect(self.btn_x4_exe) # 4번 메뉴 삭제 버튼
+        self.btn_x5.clicked.connect(self.btn_x5_exe) # 5번 메뉴 삭제 버튼
+        self.btn_minus.clicked.connect(self.btn_minus_exe)  # 1번 메뉴 감소 버튼
+        self.btn_plus.clicked.connect(self.btn_plus_exe) # 1 번 메뉴 증가 버튼
+        self.btn_minus2.clicked.connect(self.btn_minus2_exe)  # 2번 메뉴 감소 버튼
+        self.btn_plus2.clicked.connect(self.btn_plus2_exe)  # 2번 메뉴 추가 버튼
+        self.btn_minus3.clicked.connect(self.btn_minus3_exe)  # 3번 메뉴 감소 버튼
+        self.btn_plus3.clicked.connect(self.btn_plus3_exe)  # 3번 메뉴 추가 버튼
+        self.btn_minus4.clicked.connect(self.btn_minus4_exe)  # 4번 메뉴 감소 버튼
+        self.btn_plus4.clicked.connect(self.btn_plus4_exe)  # 4번 메뉴 추가 버튼
+        self.btn_minus5.clicked.connect(self.btn_minus5_exe)  # 5번 메뉴 감소 버튼
+        self.btn_plus5.clicked.connect(self.btn_plus5_exe)  # 5번 메뉴 추가 버튼
+        self.btn_delete.clicked.connect(self.btn_delete_exe) # 전체 삭제 버튼
+        self.btn_cal.clicked.connect(self.btn_cal_exe)  # 메인화면 결제하기 버튼
+        self.btn_take.clicked.connect(self.btn_take_exe)    # 먹고가기, 포장하기 버튼
+        self.btn_shop.clicked.connect(self.btn_take_exe)    # 먹고가기, 포장하기 버튼기
+        self.btn_pre3.clicked.connect(self.btn_pre3_exe)    # 돌아가기,X 버튼
+        self.btn_pre3.clicked.connect(self.btn_delete_exe)
+        # self.btn_x6.clicked.connect(self.btn_pre3_exe)      # 돌아가기,X 버튼
+
+        # 결제 수단
+        self.btn_pre3_3.clicked.connect(self.btn_pre3_3_exe) # 결제 창 돌아가기 버튼
+        self.btn_kt.clicked.connect(self.btn_kt_exe)    # KT 버튼
+        self.btn_accept_4.clicked.connect(self.btn_accept_4_exe) # KT 승인요청 버튼
+        self.btn_accept_5.clicked.connect(self.btn_accept_5_exe)
+        self.btn_x6_2.clicked.connect(self.btn_x6_2exe)  # KT X 버튼
+        self.btn_check.clicked.connect(self.btn_card_exe)  # 신용/체크카드 버튼
+        self.btn_app.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_kakao.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_payco.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_naver.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_zero.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_bc.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_oneq.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_kb.clicked.connect(self.btn_QR_exe)  # 앱 카드/ 바코드/ Qr 결제
+        self.btn_cancel.clicked.connect(self.btn_cancel_exe)  # 카드,바코드,qr 취소 버튼
+        self.btn_cancel_3.clicked.connect(self.btn_cancel_exe)  # 카드,바코드,qr 취소 버튼
+        self.btn_accept_3.clicked.connect(self.btn_accept_3_exe)
+        self.btn_cal.clicked.connect(self.pushButton_2_exe)
+
+        #주문 세부내역 추가 메뉴 버튼
+        # self.btn8_menu.clicked.connect(self.btn8_menu_exe)
+        # self.btn8_menu2.clicked.connect(self.btn8_menu2_exe)
+        # self.btn8_menu3.clicked.connect(self.btn8_menu3_exe)
+        # self.btn8_menu4.clicked.connect(self.btn8_menu4_exe)
+
+        # 수연씨 #
+        self.cinnamon.clicked.connect(self.cinnamon_ok)  # 시나몬추가 버튼
+        self.cinnamon_n_2.clicked.connect(self.cinnamon_no)  # 시나몬x 버튼
+        self.cinnamon_n_3.clicked.connect(self.whipping_ok)  # 휘핑추가 버튼
+        self.cinnamon_n_4.clicked.connect(self.whipping_no)  # 휘핑x 버튼
+        self.cinnamon_n_5.clicked.connect(self.shot_no)  # 선택안함 버튼
+        self.cinnamon_n_6.clicked.connect(self.shot_half)  # 연하게 버튼
+        self.cinnamon_n_7.clicked.connect(self.shot_one)  # 샷 추가 버튼
+        self.cinnamon_n_8.clicked.connect(self.shot_two)  # 2샷 추가 버튼
+
+        self.cinnamon_n_18.clicked.connect(self.stevia_no)
+        self.cinnamon_n_9.clicked.connect(self.stevia_ok)
+        self.cinnamon_n_19.clicked.connect(self.macaron_none)
+        self.pushButton_4.clicked.connect(self.cancel)   # 취소
+
+        self.pushButton_11.clicked.connect(self.cancel)
+        self.pushButton_13.clicked.connect(self.cancel)
+
+        self.btn_accept.clicked.connect(self.progressBar_exe)
+        self.pushButton_6.clicked.connect(self.pushButton_thanks_exe)
+        self.pushButton_5.clicked.connect(self.pushButton_2_exe)
+        self.pushButton_5.clicked.connect(self.pushButton_thanks_exe)
+
+        ##버튼 배타성 여부
+
+
+        self.btn_cgr1.setAutoExclusive(True)
+        self.btn_cgr2.setAutoExclusive(True)
+        self.btn_cgr3.setAutoExclusive(True)
+        self.btn_cgr4.setAutoExclusive(True)
+        self.btn_cgr5.setAutoExclusive(True)
+        self.btn_cgr6.setAutoExclusive(True)
+        self.btn_cgr7.setAutoExclusive(True)
+        self.btn_cgr8.setAutoExclusive(True)
+
+
+    def btn_main_exe(self):  # 홈 화면에서 메뉴 고르는 화면 넘어가는 함수
+        self.stackedWidget1.setCurrentIndex(1)
+        self.stackedWidget3.setCurrentIndex(0)
+
+    def btn_cgr1_exe(self): # 추천 메뉴 버튼 작동 함수
+        self.stackedWidget3.setCurrentIndex(0)
+    def btn_cgr2_exe(self): # 커피HOT 버튼 작동 함수
+        self.stackedWidget3.setCurrentIndex(1)
+    def btn_cgr3_exe(self): # 커피ICE 버튼 작동 함수
+        self.stackedWidget3.setCurrentIndex(2)
+    def btn_cgr4_exe(self): # 스무디, 프라페 버튼 작동 함수
+        self.stackedWidget3.setCurrentIndex(3)
+    def btn_cgr5_exe(self): # 에이드 버튼 클릭 시
+        self.stackedWidget3.setCurrentIndex(4)
+    def btn_cgr6_exe(self): # 티 버튼 클릭 시
+        self.stackedWidget3.setCurrentIndex(5)
+    def btn_cgr7_exe(self): # 음료 버튼 클릭 시
+        self.stackedWidget3.setCurrentIndex(6)
+    def btn_cgr8_exe(self): # 디저트 버튼 클릭 시
+        self.stackedWidget3.setCurrentIndex(7)
+
+    def btn_home_exe(self):  # 홈 버튼 작동 함수
+        self.stackedWidget1.setCurrentIndex(0)
+        self.reSet()
+        self.btn_delete_exe()
+    #
+    # def btn_cal_exe(self):  # 메인화면 결제하기 버튼
+    #     self.stackedWidget1.setCurrentIndex(3)
+    #     self.label_price_ck_fin.setNum(self.money_result)
+    def btn_take_exe(self): # 먹고가기, 포장하기 버튼
+        self.stackedWidget1.setCurrentIndex(4)
+        self.label_price_ck_fin_2.setNum(self.money_final_count)
+#'손흥민 그립톡(블랙)', '손흥민 그립톡(화이트)', '손흥민 H유니폼(L Size)', '손흥민 A유니폼(L Size)'
+    def btn_pre3_exe(self): # 돌아가기,X 버튼
+        self.stackedWidget1.setCurrentIndex(1)
+
+    def btn_pre3_3_exe(self):   # 결제 창 돌아가기 버튼
+        self.stackedWidget1.setCurrentIndex(3)
+    def btn_kt_exe(self):   # KT 버튼
+        self.stackedWidget1.setCurrentIndex(7)
+        self.label_10.setNum(self.money_result)
+        self.label_price_ck_fin_2.setNum(0)
+    def btn_accept_4_exe(self):     # KT 승인요청 버튼
+        self.stackedWidget1.setCurrentIndex(4)
+
+    def btn_accept_4_exe(self):  # KT 적용 버튼
+        self.stackedWidget_2.setCurrentIndex(1)
+        self.label_7.setNum(self.money_result)####
+        self.label_8.setNum(self.money_result * 0.05)
+    def btn_accept_5_exe(self):  # KT 결제하기 버튼
+        self.stackedWidget1.setCurrentIndex(4)
+        self.label_price_ck_fin_2.setNum(int(self.label_7.text())-int(self.label_8.text()))
+
+    def btn_x6_2exe(self):  # KT X 버튼
+        self.stackedWidget1.setCurrentIndex(4)
+
+    def btn_card_exe(self):  # 신용/체크카드 버튼
+        self.stackedWidget1.setCurrentIndex(5)
+        self.label_price_ck_fin_3.setNum(int(self.label_price_ck_fin_2.text()))
+
+    def btn_QR_exe(self):  # 앱 카드/ 바코드/ Qr 결제
+        self.stackedWidget1.setCurrentIndex(6)
+        self.label_11.setNum(int(self.label_price_ck_fin_2.text()))
+    def btn_cancel_exe(self):  # 카드,바코드,qr 취소 버튼
+        self.stackedWidget1.setCurrentIndex(4)
+
+    def btn_accept_3_exe(self):  # 카드,바코드,qr 승인 버튼
+        self.stackedWidget_3.setCurrentIndex(1)
+        self.label_price_ck_fin_2.setNum(int(self.label_10.text()))
+
+    def progressBar_exe(self):
+        for j in range(101):
+            self.progressBar.setValue(j)
+            sleep(0.03)
+            self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
+
+    def pushButton_2_exe(self):
+        self.stackedWidget1.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
+
+    def pushButton_thanks_exe(self):
+        self.stackedWidget1.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(0)
+        self.btn_delete_exe()
+
+    # des_menu_list = ['쿠키 프라페 마카롱', '유니콘 프라페 마카롱', '퐁크러쉬 마카롱', '바닐라 마카롱']
+    # des_menu_price = [1800, 1800, 1800, 1800]
+    #마카롱
+    def btn_menu_exe3(self, i, menu, price):
+        self.stackedWidget1.setCurrentIndex(9)
+        self.menu_name_label_6.setText(menu[i])
+        self.money_calculation += price[i]
+        self.money_count = self.money_calculation
+        self.menu_price_label_3.setNum(self.money_calculation)
+        # 주문담기 버튼 비활성화
+        self.pushButton_14.setDisabled(True)
+
+
+
+
+
+
+    # 메뉴 선택
+    def btn_menu_exe(self, i, menu, price):
+
+        #주문담기 버튼 비활성화
+        self.pushButton_3.setDisabled(True)
+        # 옵션창으로 넘어감
+        self.stackedWidget1.setCurrentIndex(2)
+        # 옵션창에 메뉴이름 표기
+        self.menu_name_label.setText(menu[i])
+
+        # 메뉴금액(price[i])에 calculation(기존) 값에 더함
+        self.money_calculation += price[i]
+
+        # 샷 추가 전 가격
+        self.money_count = self.money_calculation
+
+        # 옵션창에 금액(calculation) 표기
+        self.menu_price_label.setNum(self.money_calculation)
+
+    #스테비아 추가
+    def btn_menu_exe2(self, i, menu, price):
+        self.stackedWidget1.setCurrentIndex(8)
+        self.menu_name_label_4.setText(menu[i])
+        self.money_calculation += price[i]
+        self.money_count = self.money_calculation
+        self.menu_price_label_2.setNum(self.money_calculation)
+        # 주문담기 버튼 비활성화
+        self.pushButton_12.setDisabled(True)
+
+
+    # 장바구니로 고른 메뉴 옮기기 / pushButton_3
+    def pushButton_3_exe(self):
+        for i in range(32):
+            if self.menu_name_label.text() == all_menu[i]:
+                self.stackedWidget1.setCurrentIndex(1)
+                if self.label_ea.text() == "":
+                    self.label_price.setNum(self.money_count)
+                    self.label_name.setText(all_menu[i])
+                    self.label_ea.setNum(1)
+                    self.label_num.setNum(1)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+                    self.basket1_ea_count += int(self.label_ea.text())
+                    self.basket1_money_count += self.money_count
+
+
+                elif self.label_ea2.text() == "":
+                    self.label_price2.setNum(self.money_count)
+                    self.label_name2.setText(all_menu[i])
+                    self.label_ea2.setNum(1)
+                    self.label_num2.setNum(2)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+                    self.basket2_ea_count += int(self.label_ea2.text())
+                    self.basket2_money_count += self.money_count
+
+                elif self.label_ea3.text() == "":
+                    self.label_price3.setNum(self.money_count)
+                    self.label_name3.setText(all_menu[i])
+                    self.label_ea3.setNum(1)
+                    self.label_num3.setNum(3)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+                    self.basket3_ea_count += int(self.label_ea3.text())
+                    self.basket3_money_count += self.money_count
+                elif self.label_ea4.text() == "":
+                    self.label_price4.setNum(self.money_count)
+                    self.label_name4.setText(all_menu[i])
+                    self.label_ea4.setNum(1)
+                    self.label_num4.setNum(4)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+                    self.basket4_ea_count += int(self.label_ea4.text())
+                    self.basket4_money_count += self.money_count
+                elif self.label_ea5.text() == "":
+                    self.label_price5.setNum(self.money_count)
+                    self.label_name5.setText(all_menu[i])
+                    self.label_ea5.setNum(1)
+                    self.label_num5.setNum(5)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+                    self.basket5_ea_count += int(self.label_ea5.text())
+                    self.basket5_money_count += self.money_count
+
+        self.reSet()
+        # arithmetics에 money_count 초기값 넣음
+        self.money_arithmetics.append(self.money_count)
+
+        #증감 메뉴 안 눌렀을 때를 대비하여 초기값 총합해서 result에 넣기
+        self.money_result = sum(self.money_arithmetics)
+
+    def pushButton_3_exe2(self):
+        for i in range(32):
+            if self.menu_name_label_4.text() == all_menu[i]:
+                self.stackedWidget1.setCurrentIndex(1)
+                if self.label_ea.text() == "":
+                    self.label_price.setNum(self.money_count)
+                    self.label_name.setText(all_menu[i])
+                    self.label_ea.setNum(1)
+                    self.label_num.setNum(1)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea2.text() == "":
+                    self.label_price2.setNum(self.money_count)
+                    self.label_name2.setText(all_menu[i])
+                    self.label_ea2.setNum(1)
+                    self.label_num2.setNum(2)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea3.text() == "":
+                    self.label_price3.setNum(self.money_count)
+                    self.label_name3.setText(all_menu[i])
+                    self.label_ea3.setNum(1)
+                    self.label_num3.setNum(3)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea4.text() == "":
+                    self.label_price4.setNum(self.money_count)
+                    self.label_name4.setText(all_menu[i])
+                    self.label_ea4.setNum(1)
+                    self.label_num4.setNum(4)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea5.text() == "":
+                    self.label_price5.setNum(self.money_count)
+                    self.label_name5.setText(all_menu[i])
+                    self.label_ea5.setNum(1)
+                    self.label_num5.setNum(5)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+        self.reSet()
+        # arithmetics에 money_count 초기값 넣음
+        self.money_arithmetics.append(self.money_count)
+        #증감 메뉴 안 눌렀을 때를 대비하 초기값 총합해서 result에 넣기
+        self.money_result = sum(self.money_arithmetics)
+
+    def pushButton_3_exe3(self):
+        for i in range(32):
+            if self.menu_name_label_6.text() == all_menu[i]:
+                self.stackedWidget1.setCurrentIndex(1)
+                if self.label_ea.text() == "":
+                    self.label_price.setNum(self.money_count)
+                    self.label_name.setText(all_menu[i])
+                    self.label_ea.setNum(1)
+                    self.label_num.setNum(1)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea2.text() == "":
+                    self.label_price2.setNum(self.money_count)
+                    self.label_name2.setText(all_menu[i])
+                    self.label_ea2.setNum(1)
+                    self.label_num2.setNum(2)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea3.text() == "":
+                    self.label_price3.setNum(self.money_count)
+                    self.label_name3.setText(all_menu[i])
+                    self.label_ea3.setNum(1)
+                    self.label_num3.setNum(3)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea4.text() == "":
+                    self.label_price4.setNum(self.money_count)
+                    self.label_name4.setText(all_menu[i])
+                    self.label_ea4.setNum(1)
+                    self.label_num4.setNum(4)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+
+                elif self.label_ea5.text() == "":
+                    self.label_price5.setNum(self.money_count)
+                    self.label_name5.setText(all_menu[i])
+                    self.label_ea5.setNum(1)
+                    self.label_num5.setNum(5)
+                    self.ea_count += 1
+                    self.label_5.setNum(self.ea_count)
+        self.reSet()
+        # arithmetics에 money_count 초기값 넣음
+        self.money_arithmetics.append(self.money_count)
+        # 증감 메뉴 안 눌렀을 때를 대비하 초기값 총합해서 result에 넣기
+        self.money_result = sum(self.money_arithmetics)
+
+    # 추천 메뉴
+    def btn_menu2_exe(self, menu_index, chu_menu, chu_price):
+        self.stackedWidget1.setCurrentIndex(3)
+        if self.label_num_2.text() == "":
+            self.label_num_2.setNum(1)
+            self.label_name_2.setText(chu_menu[menu_index])
+            self.label_price_2.setNum(chu_price[menu_index])
+            self.label_ea_2.setNum(1)
+            self.ea_count += 1
+            self.label_ea6.setNum(self.ea_count)
+
+            self.money_final_count = self.money_result
+
+            self.money_final_count += chu_price[menu_index]
+            self.label_price_ck_fin.setNum(self.money_final_count)
+
+
+        elif self.label_num2_2.text() == "":
+            self.label_num2_2.setNum(2)
+            self.label_name2_2.setText(chu_menu[menu_index])
+            self.label_price2_2.setNum(chu_price[menu_index])
+            self.label_ea2_2.setNum(1)
+            self.ea_count += 1
+            self.label_ea6.setNum(self.ea_count)
+
+            self.money_final_count = self.money_result
+
+            self.money_final_count += chu_price[menu_index]
+            self.label_price_ck_fin.setNum(self.money_final_count)
+
+        elif self.label_num3_2.text() == "":
+            self.label_num3_2.setNum(3)
+            self.label_name3_2.setText(chu_menu[menu_index])
+            self.label_price3_2.setNum(chu_price[menu_index])
+            self.label_ea3_2.setNum(1)
+            self.ea_count += 1
+            self.label_ea6.setNum(self.ea_count)
+
+            self.money_final_count = self.money_result
+
+            self.money_final_count += chu_price[menu_index]
+            self.label_price_ck_fin.setNum(self.money_final_count)
+
+        elif self.label_num4_2.text() == "":
+            self.label_num4_2.setNum(4)
+            self.label_name4_2.setText(chu_menu[menu_index])
+            self.label_price4_2.setNum(chu_price[menu_index])
+            self.label_ea4_2.setNum(1)
+            self.ea_count += 1
+            self.label_ea6.setNum(self.ea_count)
+
+            self.money_final_count = self.money_result
+
+            self.money_final_count += chu_price[menu_index]
+            self.label_price_ck_fin.setNum(self.money_final_count)
+
+        elif self.label_num5_2.text() == "":
+            self.label_num5_2.setNum(5)
+            self.label_name5_2.setText(chu_menu[menu_index])
+            self.label_price5_2.setNum(chu_price[menu_index])
+            self.label_ea5_2.setNum(1)
+            self.ea_count += 1
+            self.label_ea6.setNum(self.ea_count)
+
+            self.money_final_count = self.money_result
+
+            self.money_final_count += chu_price[menu_index]
+            self.label_price_ck_fin.setNum(self.money_final_count)
+
+###############################################################33
+#옵션 상품 쌓기
+    def cinnamon_ok(self):  # 시나몬 추가
+        # self.option_c[0](="시나몬(O)")이 basket_c에 있으면 pass 없으면 추가
+        if self.option_c[0] in self.basket_c:
+            pass
+        else:
+            self.basket_c.append(self.option_c[0])
+
+            # self.option_c[1](="시나몬(x)")이 basket_c에 있으면 삭제
+            if self.option_c[1] in self.basket_c:
+                self.basket_c.remove(self.option_c[1])
+
+        # basket_c 결과값을 result에 join
+        result = "".join(self.basket_c)
+        self.label_14.setText(result)
+        self.choice_btn()
+
+    def cinnamon_no(self):  # 시나몬 빼기
+        if self.option_c[1] in self.basket_c:
+            pass
+        else:
+            self.basket_c.append(self.option_c[1] )
+            if self.option_c[0] in self.basket_c:
+                self.basket_c.remove(self.option_c[0] )
+        result = "".join(self.basket_c)
+        self.label_14.setText(result)
+        self.choice_btn()
+
+    def whipping_ok(self):  # 휘핑크림 추가
+        if self.option_w[0] in self.basket_w:
+            pass
+        else:
+            self.basket_w.append(self.option_w[0])
+            if self.option_w[1] in self.basket_w:
+                self.basket_w.remove(self.option_w[1])
+        result = "".join(self.basket_w)
+        self.label_15.setText(result)
+        self.choice_btn()
+
+    def whipping_no(self):  # 휘핑크림 빼기
+        if self.option_w[1] in self.basket_w:
+            pass
+        else:
+            self.basket_w.append(self.option_w[1])
+            if self.option_w[0] in self.basket_w:
+                self.basket_w.remove(self.option_w[0])
+        result = "".join(self.basket_w)
+        self.label_15.setText(result)
+        self.choice_btn()
+
+
+    def shot_no(self):  # 선택안함
+        shot_n = self.option_s[0]  # 선택안함
+        shot_h = self.option_s[1]  # 연하게
+        shot_o = self.option_s[2]  # 샷 추가(500원)
+        shot_t = self.option_s[3]  # 2샷 추가(1000원)
+
+        self.money_count = self.money_calculation  # 샷 추가 전 가격
+
+        if shot_n in self.basket_s:
+            pass
+        else:
+            self.basket_s.append(shot_n)  # 샷 옵션 출력할 바구니(basket_s)에 넣음
+
+            if shot_h in self.basket_s:
+                self.basket_s.remove(shot_h)
+            if shot_o in self.basket_s:
+                self.basket_s.remove(shot_o)
+            if shot_t in self.basket_s:
+                self.basket_s.remove(shot_t)
+        result = "".join(self.basket_s)
+        self.label_69.setText(result)
+        self.choice_btn()
+
+    def shot_half(self):  # 연하게
+        self.money_count = self.money_calculation  # 샷 추가 전 가격
+        if self.option_s[1] in self.basket_s:
+            pass
+        else:
+            self.basket_s.append(self.option_s[1])
+            self.menu_price_label.setNum(self.money_count)
+
+            if self.option_s[0] in self.basket_s:
+                self.basket_s.remove(self.option_s[0])
+            if self.option_s[2] in self.basket_s:
+                self.basket_s.remove(self.option_s[2])
+            if self.option_s[3] in self.basket_s:
+                self.basket_s.remove(self.option_s[3])
+        result = "".join(self.basket_s)
+        self.label_69.setText(result)
+        self.choice_btn()
+
+    def shot_one(self):  # 샷 추가
+        self.money_count = self.money_calculation  # 샷 추가 전 가격
+
+        if self.option_s[2] in self.basket_s:
+            pass
+        else:
+            self.money_count += 500  # 2000
+            self.basket_s.append(self.option_s[2])
+            self.menu_price_label.setNum(self.money_count)
+
+            if self.option_s[0] in self.basket_s:
+                self.basket_s.remove(self.option_s[0])
+            if self.option_s[1] in self.basket_s:
+                self.basket_s.remove(self.option_s[1])
+            if self.option_s[3] in self.basket_s:
+                self.basket_s.remove(self.option_s[3])
+        result = "".join(self.basket_s)
+        self.label_69.setText(result)
+        self.choice_btn()
+
+    def shot_two(self):  # 2샷 추가
+        self.money_count = self.money_calculation  # 샷 추가 전 가격
+
+        if self.option_s[3] in self.basket_s:
+            pass
+        else:
+            self.money_count += 1000  # 4800
+            self.basket_s.append(self.option_s[3])
+            self.menu_price_label.setNum(self.money_count)
+
+            if self.option_s[0] in self.basket_s:
+                self.basket_s.remove(self.option_s[0])
+            if self.option_s[1] in self.basket_s:
+                self.basket_s.remove(self.option_s[1])
+            if self.option_s[2] in self.basket_s:
+                self.basket_s.remove(self.option_s[2])
+        result = "".join(self.basket_s)
+        self.label_69.setText(result)
+        print(self.money_count)
+        self.choice_btn()
+        # 스테비아
+
+    def stevia_no(self):  # 스테비아 빼기
+        if self.option_stevia[0] in self.basket_stevia:
+            pass
+        else:
+            self.basket_stevia.append(self.option_stevia[0])
+
+            if self.option_stevia[1] in self.basket_stevia:
+                self.basket_stevia.remove(self.option_stevia[1])
+        result = "".join(self.basket_stevia)
+        self.label_25.setText(result)
+        self.choice_btn2()
+
+    def stevia_ok(self):  # 시나몬 추가
+        if self.option_stevia[1] in self.basket_stevia:
+            pass
+        else:
+            self.basket_stevia.append(self.option_stevia[1])
+            if self.option_stevia[0] in self.basket_stevia:
+                self.basket_stevia.remove(self.option_stevia[0])
+        result = "".join(self.basket_stevia)
+        self.label_25.setText(result)
+        self.choice_btn2()
+
+    def macaron_none(self):
+        self.label_26.setText(self.option_macaron)
+        self.pushButton_14.setDisabled(False)
+
+    def choice_btn(self):
+       if self.basket_c and self.basket_s and self.basket_w:
+           self.pushButton_3.setDisabled(False)
+
+    def choice_btn2(self):
+       if self.basket_stevia:
+           self.pushButton_12.setDisabled(False)
+
+    def reSet(self):  # 초기화
+        self.basket_c = []
+        self.basket_w = []
+        self.basket_s = []
+        self.basket_stevia = []
+        self.label_25.setText("")
+        self.label_14.setText("")
+        self.label_15.setText("")
+        self.label_69.setText("")
+        self.label_26.setText("")
+        self.money_calculation = 0
+
+
+    #취소 버튼
+    def cancel(self):
+        self.reSet()            #reSet()함수 호출
+        self.stackedWidget1.setCurrentIndex(1)      #메뉴 선택창으로 복귀
+
+
+############################################################################
+    def btn_plus_minus_exe(self, num, label1, price1):
+        money_plus = self.money_arithmetics[num]
+        self.money_plus_exe[num] = money_plus * (int(label1.text()))
+        price1.setNum(self.money_plus_exe[num])
+        self.money_result = sum(self.money_plus_exe)
+
+    # 메뉴 화면에서 증가, 감소 버튼
+    def btn_minus_exe(self): # 1번 메뉴 감소
+        if int(self.label_ea.text()) > 1:
+            self.label_ea.setNum(int(self.label_ea.text()) - 1)
+            self.basket1_ea_count -= 1
+            self.ea_count -= 1
+            self.label_5.setNum(self.ea_count)
+            self.btn_plus_minus_exe(0,self.label_ea, self.label_price)
+        # elif int(self.label_ea.text()) > 1 and
+
+    def btn_plus_exe(self): # 1번 메뉴 증가
+        if int(self.label_ea.text()) < 100:
+            self.label_ea.setNum(int(self.label_ea.text()) + 1)
+            self.basket1_ea_count += 1
+            self.ea_count += 1
+            self.label_5.setNum(self.ea_count) # 전체 수량 바구니 12345 수량 더하는 걸로 바꾸
+
+            self.btn_plus_minus_exe(0, self.label_ea, self.label_price)
+
+    def btn_minus2_exe(self): # 2번 메뉴 감소
+        if int(self.label_ea2.text()) > 1:
+            self.label_ea2.setNum(int(self.label_ea2.text()) - 1)
+            self.basket2_ea_count -= 1
+            self.ea_count -= 1
+            self.btn_plus_minus_exe(1, self.label_ea2, self.label_price2)
+
+
+    def btn_plus2_exe(self): # 2번 메뉴 증가
+        if int(self.label_ea2.text()) < 100:
+            self.label_ea2.setNum(int(self.label_ea2.text()) + 1)
+            self.basket1_ea_count += 1
+            self.ea_count += 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(1, self.label_ea2, self.label_price2)
+    def btn_minus3_exe(self): # 3번 메뉴 감소
+        if int(self.label_ea3.text()) > 1:
+            self.label_ea3.setNum(int(self.label_ea3.text()) - 1)
+            self.basket3_ea_count -= 1
+            self.ea_count -= 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(2, self.label_ea3, self.label_price3)
+    def btn_plus3_exe(self): # 3번 메뉴 증가
+        if int(self.label_ea3.text()) < 100:
+            self.label_ea3.setNum(int(self.label_ea3.text()) + 1)
+            self.basket3_ea_count += 1
+            self.ea_count += 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(2, self.label_ea3, self.label_price3)
+
+    def btn_minus4_exe(self): # 4번 메뉴 감소
+        if int(self.label_ea4.text()) > 1:
+            self.label_ea4.setNum(int(self.label_ea4.text()) - 1)
+            self.basket4_ea_count -= 1
+            self.ea_count -= 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(3, self.label_ea4, self.label_price4)
+
+    def btn_plus4_exe(self): # 4번 메뉴 증가
+        if int(self.label_ea4.text()) < 100:
+            self.label_ea4.setNum(int(self.label_ea4.text()) + 1)
+            self.basket4_ea_count += 1
+            self.ea_count += 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(3, self.label_ea4, self.label_price4)
+
+    def btn_minus5_exe(self): # 5번 메뉴 감소
+        if int(self.label_ea5.text()) > 1:
+            self.label_ea5.setNum(int(self.label_ea5.text()) - 1)
+            self.basket5_ea_count -= 1
+            self.ea_count -= 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(4, self.label_ea5, self.label_price5)
+
+    def btn_plus5_exe(self): # 5번 메뉴 증가 버튼
+        if int(self.label_ea5.text()) < 100:
+            self.label_ea5.setNum(int(self.label_ea5.text()) + 1)
+            self.basket5_ea_count += 1
+            self.ea_count += 1
+            self.label_5.setNum(self.ea_count)
+
+            self.btn_plus_minus_exe(4, self.label_ea5, self.label_price5)
+
+    def btn_x_exe(self):  # 1번 메뉴 삭제 버튼 클릭
+        if len(str(self.label_name5.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea5.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_5.setNum(self.ea_count - int(self.label_ea.text()))
+            self.label_name.setText(str(self.label_name2.text()))
+            self.label_name_2.setText(str(self.label_name2_2.text()))
+            self.label_ea.setNum(int(self.label_ea2.text()))
+            self.label_price.setNum(int(self.label_price2.text()))
+            self.label_name2.setText(str(self.label_name3.text()))
+            self.label_name2_2.setText(str(self.label_name3_2.text()))
+            self.label_ea2.setNum(int(self.label_ea3.text()))
+            self.label_price2.setNum(int(self.label_price3.text()))
+            self.label_name3.setText(str(self.label_name4.text()))
+            self.label_name3_2.setText(str(self.label_name4_2.text()))
+            self.label_ea3.setNum(int(self.label_ea4.text()))
+            self.label_price3.setNum(int(self.label_price4.text()))
+            self.label_name4.setText(str(self.label_name5.text()))
+            self.label_name4_2.setText(str(self.label_name5_2.text()))
+            self.label_ea4.setNum(int(self.label_ea5.text()))
+            self.label_price4.setNum(int(self.label_price5.text()))
+            self.label_name5.setText("")
+            self.label_name5_2.setText("")
+            self.label_ea5.setText("")
+            self.label_ea5_2.setText("")
+            self.label_price5.setText("")
+            self.label_price5_2.setText("")
+            self.label_num5.setText("")
+            self.label_num5_2.setText("")
+        elif len(str(self.label_name4.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea4.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name.setText(str(self.label_name2.text()))
+            self.label_name_2.setText(str(self.label_name2_2.text()))
+            self.label_ea.setNum(int(self.label_ea2.text()))
+            self.label_price.setNum(int(self.label_price2.text()))
+            self.label_name2.setText(str(self.label_name3.text()))
+            self.label_name2_2.setText(str(self.label_name3_2.text()))
+            self.label_ea2.setNum(int(self.label_ea3.text()))
+            self.label_price2.setNum(int(self.label_price3.text()))
+            self.label_name3.setText(str(self.label_name4.text()))
+            self.label_name3_2.setText(str(self.label_name4_2.text()))
+            self.label_ea3.setNum(int(self.label_ea4.text()))
+            self.label_price3.setNum(int(self.label_price4.text()))
+            self.label_name4.setText("")
+            self.label_name4_2.setText("")
+            self.label_ea4.setText("")
+            self.label_ea4_2.setText("")
+            self.label_price4.setText("")
+            self.label_price4_2.setText("")
+            self.label_num4.setText("")
+            self.label_num4_2.setText("")
+        elif len(str(self.label_name3.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea3.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name.setText(str(self.label_name2.text()))
+            self.label_name_2.setText(str(self.label_name2_2.text()))
+            self.label_ea.setNum(int(self.label_ea2.text()))
+            self.label_price.setNum(int(self.label_price2.text()))
+            self.label_name2.setText(str(self.label_name3.text()))
+            self.label_name2_2.setText(str(self.label_name3_2.text()))
+            self.label_ea2.setNum(int(self.label_ea3.text()))
+            self.label_price2.setNum(int(self.label_price3.text()))
+            self.label_name3.setText("")
+            self.label_name3_2.setText("")
+            self.label_ea3.setText("")
+            self.label_ea3_2.setText("")
+            self.label_price3.setText("")
+            self.label_price3_2.setText("")
+            self.label_num3.setText("")
+            self.label_num3_2.setText("")
+        elif len(str(self.label_name2.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea2.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name.setText(str(self.label_name2.text()))
+            self.label_name_2.setText(str(self.label_name2_2.text()))
+            self.label_ea.setNum(int(self.label_ea2.text()))
+            self.label_price.setNum(int(self.label_price2.text()))
+            self.label_name2.setText("")
+            self.label_name2_2.setText("")
+            self.label_ea2.setText("")
+            self.label_ea2_2.setText("")
+            self.label_price2.setText("")
+            self.label_price2_2.setText("")
+            self.label_num2.setText("")
+            self.label_num2_2.setText("")
+        elif len(str(self.label_name.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name.setText("")
+            self.label_name_2.setText("")
+            self.label_ea.setText("")
+            self.label_ea_2.setText("")
+            self.label_price.setText("")
+            self.label_price_2.setText("")
+            self.label_num.setText("")
+            self.label_num_2.setText("")
+        elif len(str(self.label_name.text())) == 0:
+            pass
+
+    def btn_x2_exe(self):  # 2번 메뉴 삭제 버튼 클릭
+        if len(str(self.label_name5.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea5.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name2.setText(str(self.label_name3.text()))
+            self.label_name2_2.setText(str(self.label_name3_2.text()))
+            self.label_ea2.setNum(int(self.label_ea3.text()))
+            self.label_price2.setNum(int(self.label_price3.text()))
+            self.label_name3.setText(str(self.label_name4.text()))
+            self.label_name3_2.setText(str(self.label_name4_2.text()))
+            self.label_ea3.setNum(int(self.label_ea4.text()))
+            self.label_price3.setNum(int(self.label_price4.text()))
+            self.label_name4.setText(str(self.label_name5.text()))
+            self.label_name4_2.setText(str(self.label_name5_2.text()))
+            self.label_ea4.setNum(int(self.label_ea5.text()))
+            self.label_price4.setNum(int(self.label_price5.text()))
+            self.label_name5.setText("")
+            self.label_name5_2.setText("")
+            self.label_ea5.setText("")
+            self.label_ea5_2.setText("")
+            self.label_price5.setText("")
+            self.label_price5_2.setText("")
+            self.label_num5.setText("")
+            self.label_num5_2.setText("")
+        elif len(str(self.label_name4.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea4.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name2.setText(str(self.label_name3.text()))
+            self.label_name2_2.setText(str(self.label_name3_2.text()))
+            self.label_ea2.setNum(int(self.label_ea3.text()))
+            self.label_price2.setNum(int(self.label_price3.text()))
+            self.label_name3.setText(str(self.label_name4.text()))
+            self.label_name3_2.setText(str(self.label_name4_2.text()))
+            self.label_ea3.setNum(int(self.label_ea4.text()))
+            self.label_price3.setNum(int(self.label_price4.text()))
+            self.label_name4.setText("")
+            self.label_name4_2.setText("")
+            self.label_ea4.setText("")
+            self.label_ea4_2.setText("")
+            self.label_price4.setText("")
+            self.label_price4_2.setText("")
+            self.label_num4.setText("")
+            self.label_num4_2.setText("")
+        elif len(str(self.label_name3.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea3.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name2.setText(str(self.label_name3.text()))
+            self.label_name2_2.setText(str(self.label_name3_2.text()))
+            self.label_ea2.setNum(int(self.label_ea3.text()))
+            self.label_price2.setNum(int(self.label_price3.text()))
+            self.label_name3.setText("")
+            self.label_name3_2.setText("")
+            self.label_ea3.setText("")
+            self.label_ea3_2.setText("")
+            self.label_price3.setText("")
+            self.label_price3_2.setText("")
+            self.label_num3.setText("")
+            self.label_num3_2.setText("")
+        elif len(str(self.label_name2.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea2.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name2.setText("")
+            self.label_name2_2.setText("")
+            self.label_ea2.setText("")
+            self.label_ea2_2.setText("")
+            self.label_price2.setText("")
+            self.label_price2_2.setText("")
+            self.label_num2.setText("")
+            self.label_num2_2.setText("")
+        elif len(str(self.label_name2.text())) == 0:
+            pass
+
+    def btn_x3_exe(self):  # 3번 메뉴 삭제 버튼 클릭
+        if len(str(self.label_name5.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea5.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name3.setText(str(self.label_name4.text()))
+            self.label_name3_2.setText(str(self.label_name4_2.text()))
+            self.label_ea3.setNum(int(self.label_ea4.text()))
+            self.label_price3.setNum(int(self.label_price4.text()))
+            self.label_name4.setText(str(self.label_name5.text()))
+            self.label_name4_2.setText(str(self.label_name5_2.text()))
+            self.label_ea4.setNum(int(self.label_ea5.text()))
+            self.label_price4.setNum(int(self.label_price5.text()))
+            self.label_name5.setText("")
+            self.label_name5_2.setText("")
+            self.label_ea5.setText("")
+            self.label_ea5_2.setText("")
+            self.label_price5.setText("")
+            self.label_price5_2.setText("")
+            self.label_num5.setText("")
+            self.label_num5_2.setText("")
+        elif len(str(self.label_name4.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea4.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name3.setText(str(self.label_name4.text()))
+            self.label_ea3.setNum(int(self.label_ea4.text()))
+            self.label_price3.setNum(int(self.label_price4.text()))
+            self.label_name4.setText("")
+            self.label_name4_2.setText("")
+            self.label_ea4.setText("")
+            self.label_ea4_2.setText("")
+            self.label_price4.setText("")
+            self.label_price4_2.setText("")
+            self.label_num4.setText("")
+            self.label_num4_2.setText("")
+        elif len(str(self.label_name3.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea3.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name3.setText("")
+            self.label_name3_2.setText("")
+            self.label_ea3.setText("")
+            self.label_ea3_2.setText("")
+            self.label_price3.setText("")
+            self.label_price3_2.setText("")
+            self.label_num3.setText("")
+            self.label_num3_2.setText("")
+        elif len(str(self.label_name3.text())) == 0:
+            pass
+
+    def btn_x4_exe(self):  # 4번 메뉴 삭제 버튼 클릭
+        if len(str(self.label_name5.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea5.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name4.setText(str(self.label_name5.text()))
+            self.label_ea4.setNum(int(self.label_ea5.text()))
+            self.label_price4.setNum(int(self.label_price5.text()))
+            self.label_name5.setText("")
+            self.label_name5_2.setText("")
+            self.label_ea5.setText("")
+            self.label_ea5_2.setText("")
+            self.label_price5.setText("")
+            self.label_price5_2.setText("")
+            self.label_num5.setText("")
+            self.label_num5_2.setText("")
+        elif len(str(self.label_name4.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea4.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name4.setText("")
+            self.label_name4_2.setText("")
+            self.label_ea4.setText("")
+            self.label_ea4_2.setText("")
+            self.label_price4.setText("")
+            self.label_price4_2.setText("")
+            self.label_num4.setText("")
+            self.label_num4_2.setText("")
+        elif len(str(self.label_name4.text())) == 0:
+            pass
+
+    def btn_x5_exe(self):  # 5번 메뉴 삭제 버튼 클릭
+        if len(str(self.label_name5.text())) > 1:
+            self.ea_count = self.ea_count - int(self.label_ea5.text())
+            self.label_5.setNum(self.ea_count)
+            self.label_name5.setText("")
+            self.label_name5_2.setText("")
+            self.label_ea5.setText("")
+            self.label_ea5_2.setText("")
+            self.label_price5.setText("")
+            self.label_price5_2.setText("")
+            self.label_num5.setText("")
+            self.label_num5_2.setText("")
+        elif len(str(self.label_name5.text())) == 0:
+            pass
+
+    def btn_delete_exe(self):  # 전체 삭제 버튼 클릭
+            self.ea_count = 0
+            self.label_5.setNum(self.ea_count)
+            self.label_name.setText("")
+            self.label_name_2.setText("")
+            self.label_name2.setText("")
+            self.label_name2_2.setText("")
+            self.label_name3.setText("")
+            self.label_name3_2.setText("")
+            self.label_name4.setText("")
+            self.label_name4_2.setText("")
+            self.label_name5.setText("")
+            self.label_name5_2.setText("")
+            self.label_ea.setText("")
+            self.label_ea_2.setText("")
+            self.label_ea2.setText("")
+            self.label_ea2_2.setText("")
+            self.label_ea3.setText("")
+            self.label_ea3_2.setText("")
+            self.label_ea4.setText("")
+            self.label_ea4_2.setText("")
+            self.label_ea5.setText("")
+            self.label_ea5_2.setText("")
+            self.label_price.setText("")
+            self.label_price_2.setText("")
+            self.label_price2.setText("")
+            self.label_price2_2.setText("")
+            self.label_price3.setText("")
+            self.label_price3_2.setText("")
+            self.label_price4.setText("")
+            self.label_price4_2.setText("")
+            self.label_price5.setText("")
+            self.label_price5_2.setText("")
+            self.label_num.setText("")
+            self.label_num_2.setText("")
+            self.label_num2.setText("")
+            self.label_num2_2.setText("")
+            self.label_num3.setText("")
+            self.label_num3_2.setText("")
+            self.label_num4.setText("")
+            self.label_num4_2.setText("")
+            self.label_num5.setText("")
+            self.label_num5_2.setText("")
+            self.label_price_ck_fin.setText("")
+
+            self.money_arithmetics.clear()
+            self.money_result = 0
+            self.money_plus_exe.clear()
+
+    def btn_cal_exe(self):  # 메인화면 결제하기 버튼
+        self.stackedWidget1.setCurrentIndex(3)
+        self.label_ea6.setNum(self.ea_count)
+        self.label_price_ck_fin.setNum(self.money_result)
+
+
+        if self.label_name.text() != "" and self.label_name2.text() != "" and self.label_name3.text() != "" \
+                and self.label_name4.text() != "" and self.label_name5.text() != "":
+            self.label_name_2.setText(self.label_name.text())
+            self.label_price_2.setNum(int(self.label_price.text()))#
+            self.label_ea_2.setNum(int(self.label_ea.text()))
+            self.label_num_2.setNum(1)
+
+
+            self.label_name2_2.setText(self.label_name2.text())
+            self.label_price2_2.setNum(int(self.label_price2.text()))
+            self.label_ea2_2.setNum(int(self.label_ea2.text()))
+            self.label_num2_2.setNum(2)
+
+
+            self.label_name3_2.setText(self.label_name3.text())
+            self.label_price3_2.setNum(int(self.label_price3.text()))
+            self.label_ea3_2.setNum(int(self.label_ea3.text()))
+            self.label_num3_2.setNum(3)
+
+
+            self.label_name4_2.setText(self.label_name4.text())
+            self.label_price4_2.setNum(int(self.label_price4.text()))
+            self.label_ea4_2.setNum(int(self.label_ea4.text()))
+            self.label_num4_2.setNum(4)
+
+
+            self.label_name5_2.setText(self.label_name5.text())
+            self.label_price5_2.setNum(int(self.label_price5.text()))
+            self.label_ea5_2.setNum(int(self.label_ea5.text()))
+            self.label_num5_2.setNum(5)
+
+
+        elif self.label_name.text() != "" and self.label_name2.text() != "" and self.label_name3.text() != "" \
+                and self.label_name4.text() != "" and self.label_name5.text() == "":
+            self.label_name_2.setText(self.label_name.text())
+            self.label_price_2.setNum(int(self.label_price.text()))  #
+            self.label_ea_2.setNum(int(self.label_ea.text()))
+            self.label_num_2.setNum(1)
+
+
+            self.label_name2_2.setText(self.label_name2.text())
+            self.label_price2_2.setNum(int(self.label_price2.text()))
+            self.label_ea2_2.setNum(int(self.label_ea2.text()))
+            self.label_num2_2.setNum(2)
+
+
+            self.label_name3_2.setText(self.label_name3.text())
+            self.label_price3_2.setNum(int(self.label_price3.text()))
+            self.label_ea3_2.setNum(int(self.label_ea3.text()))
+            self.label_num3_2.setNum(3)
+
+
+            self.label_name4_2.setText(self.label_name4.text())
+            self.label_price4_2.setNum(int(self.label_price4.text()))
+            self.label_ea4_2.setNum(int(self.label_ea4.text()))
+            self.label_num4_2.setNum(4)
+
+
+        elif (self.label_name.text() != "" and self.label_name2.text() != "" and self.label_name3.text() != "" and\
+              self.label_name4.text() == "" and self.label_name5.text() == ""):
+            self.label_name_2.setText(self.label_name.text())
+            self.label_price_2.setNum(int(self.label_price.text()))  #
+            self.label_ea_2.setNum(int(self.label_ea.text()))
+            self.label_num_2.setNum(1)
+
+
+            self.label_name2_2.setText(self.label_name2.text())
+            self.label_price2_2.setNum(int(self.label_price2.text()))
+            self.label_ea2_2.setNum(int(self.label_ea2.text()))
+            self.label_num2_2.setNum(2)
+
+
+            self.label_name3_2.setText(self.label_name3.text())
+            self.label_price3_2.setNum(int(self.label_price3.text()))
+            self.label_ea3_2.setNum(int(self.label_ea3.text()))
+            self.label_num3_2.setNum(3)
+
+
+
+        elif (self.label_name.text() != "" and self.label_name2.text() != "" and self.label_name3.text() == "" \
+              and self.label_name4.text() == "" and self.label_name5.text() == ""):
+            self.label_name_2.setText(self.label_name.text())
+            self.label_price_2.setNum(int(self.label_price.text()))  #
+            self.label_ea_2.setNum(int(self.label_ea.text()))
+            self.label_num_2.setNum(1)
+
+
+            self.label_name2_2.setText(self.label_name2.text())
+            self.label_price2_2.setNum(int(self.label_price2.text()))
+            self.label_ea2_2.setNum(int(self.label_ea2.text()))
+            self.label_num2_2.setNum(2)
+
+
+        elif (self.label_name.text() != "" and self.label_name2.text() == "" and self.label_name3.text() == "" \
+              and self.label_name4.text() == "" and self.label_name5.text() == ""):
+            self.label_name_2.setText(self.label_name.text())
+            self.label_price_2.setNum(int(self.label_price.text()))  #
+            self.label_ea_2.setNum(int(self.label_ea.text()))
+            self.label_num_2.setNum(1)
+
+
+
+
+
+
+
+if __name__ == "__main__" :
+    app = QApplication(sys.argv)
+    myWindow = WindowClass()
+    myWindow.show()
+    app.exec_()
